@@ -17,9 +17,6 @@ def call(Map args) {
           script {
             def propsFile = 'jenkins.properties'
             def hasPropsFile = new File("$WORKSPACE/$propsFile").exists()
-            if(hasPropsFile) {
-              println("Reading properties from $propsFile")
-            }
             def props = hasPropsFile ? readProperties(file: propsFile) : new HashMap()
 
             if(props['publish'] != null) {
@@ -29,7 +26,6 @@ def call(Map args) {
             } else {
               publish = true
             }
-            println("publish: $publish")
 
             if(props['publishTaggedOnly'] != null) {
               publishTaggedOnly = props['publishTaggedOnly'] == 'true'
@@ -38,7 +34,6 @@ def call(Map args) {
             } else {
               publishTaggedOnly = BRANCH_NAME == "master"
             }
-            println("publishTaggedOnly: $publishTaggedOnly")
 
             if(props['upstreamProjects'] != null) {
               upstreamProjects = props['upstreamProjects']
@@ -47,7 +42,6 @@ def call(Map args) {
             } else {
               upstreamProjects = ''
             }
-            println("upstreamProjects: $upstreamProjects")
 
             if(props['gradleRefreshDependencies'] != null) {
               gradleRefreshDependencies = props['gradleRefreshDependencies'] == 'true'
@@ -56,7 +50,6 @@ def call(Map args) {
             } else {
               gradleRefreshDependencies = upstreamProjects != ''
             }
-            println("gradleRefreshDependencies: $gradleRefreshDependencies")
           }
         }
       }
