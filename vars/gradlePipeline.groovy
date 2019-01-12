@@ -21,9 +21,9 @@ def call(Map args) {
         steps {
           script {
             def defaultProps = [
-              'publish'                      : publish ?: true
-              , 'publish.tagged.only'        : publishTaggedOnly ?: (BRANCH_NAME == "master")
-              , 'gradle.refresh.dependencies': gradleRefreshDependencies ?: hasUpstreamProjects
+              'publish'                      : Boolean.toString(publish ?: true)
+              , 'publish.tagged.only'        : Boolean.toString(publishTaggedOnly ?: (BRANCH_NAME == "master"))
+              , 'gradle.refresh.dependencies': Boolean.toString(gradleRefreshDependencies ?: hasUpstreamProjects)
             ]
             def props = readProperties defaults: defaultProps, file: 'jenkins.properties'
             publish = props['publish'] == 'true'
