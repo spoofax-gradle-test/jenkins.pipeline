@@ -8,10 +8,6 @@ def call(Map args) {
   pipeline {
     agent any
 
-    triggers {
-      upstream(upstreamProjects: hasUpstreamProjects ? upstreamProjects.join(",") : "", threshold: hudson.model.Result.SUCCESS)
-    }
-
     environment {
       JENKINS_NODE_COOKIE = 'dontKillMe' // Necessary for the Gradle daemon to be kept alive.
     }
@@ -60,6 +56,10 @@ def call(Map args) {
           }
         }
       }
+    }
+
+    triggers {
+      upstream(upstreamProjects: hasUpstreamProjects ? upstreamProjects.join(",") : "", threshold: hudson.model.Result.SUCCESS)
     }
   }
 }
