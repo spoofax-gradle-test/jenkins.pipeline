@@ -16,7 +16,7 @@ def call(Map args) {
         steps {
           script {
             def propsFile = 'jenkins.properties'
-            def hasPropsFile = new File(propsFile).exists()
+            def hasPropsFile = new File("$WORKSPACE/$propsFile").exists()
             if(hasPropsFile) {
               println("Reading properties from $propsFile")
             }
