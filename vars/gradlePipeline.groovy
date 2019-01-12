@@ -7,7 +7,7 @@ def call(Map args) {
     agent any
 
     triggers {
-      upstream(upstreamProjects: args.upstreamProjects != null ? args.upstreamProjects.join(",") : "", threshold: hudson.model.Result.SUCCESS)
+      upstream(upstreamProjects: args?.upstreamProjects != null ? args.upstreamProjects.join(",") : "", threshold: hudson.model.Result.SUCCESS)
     }
 
     environment {
@@ -19,9 +19,9 @@ def call(Map args) {
         steps {
           script {
             def defaultProps = [
-              'publish'                      : args.publish != null ? args.publish : true
-              , 'publish.tagged.only'        : args.publishTaggedOnly != null ? args.publishTaggedOnly : (BRANCH_NAME == "master")
-              , 'gradle.refresh.dependencies': args.gradleRefreshDependencies != null ? args.gradleRefreshDependencies : (args.upstreamProjects != null && !args.upstreamProjects.length() > 0)
+              'publish'                      : args?.publish != null ? args.publish : true
+              , 'publish.tagged.only'        : args?.publishTaggedOnly != null ? args.publishTaggedOnly : (BRANCH_NAME == "master")
+              , 'gradle.refresh.dependencies': args?.gradleRefreshDependencies != null ? args.gradleRefreshDependencies : (args.upstreamProjects != null && !args.upstreamProjects.length() > 0)
             ]
             def props = readProperties defaults: defaultProps, file: 'jenkins.properties'
             publish = props['publish'] == 'true'
