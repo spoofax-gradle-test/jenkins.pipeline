@@ -1,9 +1,8 @@
 def call(Map args) {
-  def publish = args?.publish
-  def publishTaggedOnly = args?.publishTaggedOnly
-  def gradleRefreshDependencies = args?.gradleRefreshDependencies
-  def upstreamProjects = args?.upstreamProjects
-  def hasUpstreamProjects = upstreamProjects != null && upstreamProjects.length() > 0
+  boolean publish
+  boolean publishTaggedOnly
+  String upstreamProjects
+  boolean gradleRefreshDependencies
 
   pipeline {
     agent any
@@ -16,15 +15,39 @@ def call(Map args) {
       stage('Prepare') {
         steps {
           script {
-            def defaultProps = [
-              'publish'                      : Boolean.toString(publish == null ? true : publish)
-              , 'publish.tagged.only'        : Boolean.toString(publishTaggedOnly == null ? (BRANCH_NAME == "master") : publishTaggedOnly)
-              , 'gradle.refresh.dependencies': Boolean.toString(gradleRefreshDependencies == null ? hasUpstreamProjects : gradleRefreshDependencies)
-            ]
-            def props = readProperties defaults: defaultProps, file: 'jenkins.properties'
-            publish = props['publish'] == 'true'
-            publishTaggedOnly = props['publish.tagged.only'] == 'true'
-            gradleRefreshDependencies = props['gradle.refresh.dependencies'] == 'true'
+            def props = new File('jenkins.properties').exists() ? readProperties(file: 'jenkins.properties') : new HashMap()
+
+            if(props['publish'] != null) {
+              publish = props['publish'] == 'true'
+            } else if(args?.publish != null) {
+              publish = args.publish
+            } else {
+              publish = true
+            }
+
+            if(props['publishTaggedOnly'] != null) {
+              publishTaggedOnly = props['publishTaggedOnly'] == 'true'
+            } else if(args?.publishTaggedOnly != null) {
+              publishTaggedOnly = args.publishTaggedOnly
+            } else {
+              publishTaggedOnly = BRANCH_NAME == "master"
+            }
+
+            if(props['upstreamProjects'] != null) {
+              upstreamProjects = props['upstreamProjects']
+            } else if(args?.upstreamProjects != null && args.upstreamProjects instanceof List<String> && args.upstreamProjects.length() > 0) {
+              upstreamProjects = args.upstreamProjects.join(',')
+            } else {
+              upstreamProjects = ''
+            }
+
+            if(props['gradleRefreshDependencies'] != null) {
+              gradleRefreshDependencies = props['gradleRefreshDependencies'] == 'true'
+            } else if(args?.gradleRefreshDependencies != null) {
+              gradleRefreshDependencies = args.gradleRefreshDependencies
+            } else {
+              gradleRefreshDependencies = upstreamProjects != ''
+            }
           }
         }
       }
@@ -59,7 +82,7 @@ def call(Map args) {
     }
 
     triggers {
-      upstream(upstreamProjects: hasUpstreamProjects ? upstreamProjects.join(",") : "", threshold: hudson.model.Result.SUCCESS)
+      upstream(upstreamProjects: upstreamProjects, threshold: hudson.model.Result.SUCCESS)
     }
   }
 }
